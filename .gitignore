@@ -1,0 +1,42 @@
+# ============================================================
+# Khatawat — Monorepo .gitignore
+# ============================================================
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea
+.vscode
+*.swp
+*.swo
+
+# Laravel
+laravel_app/.env
+laravel_app/.env.backup
+laravel_app/.env.production
+laravel_app/vendor/
+laravel_app/node_modules/
+laravel_app/public/build
+laravel_app/public/hot
+laravel_app/public/storage
+laravel_app/storage/*.key
+laravel_app/bootstrap/cache/*.php
+*.log
+
+# Storefront
+storefront/.env
+storefront/.env.local
+storefront/.env.production
+storefront/node_modules/
+storefront/.next/
+storefront/out/
+
+# Optional: مجلدات قديمة في الجذر (إن وجدت)
+app/
+database/
+resources/
+routes/
+src/
+vite.config.js

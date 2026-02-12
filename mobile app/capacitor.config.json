@@ -1,0 +1,21 @@
+{
+  "appId": "com.khtwat.erp",
+  "appName": "خطوات ERP",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https",
+    "allowNavigation": ["https://erp.khtwat.com", "https://*.khtwat.com"],
+    "cleartext": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#F97316"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#F97316"
+    }
+  }
+}
