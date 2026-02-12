@@ -53,8 +53,16 @@ class SellerPanelProvider extends PanelProvider
                 PanelsRenderHook::GLOBAL_SEARCH_AFTER,
                 function (): HtmlString {
                     $tenant = Filament::getTenant();
-                    $domain = $tenant?->subdomain ?? $tenant?->domain ?? '';
-                    $url = 'http://localhost:3001?domain=' . $domain;
+                    if (! $tenant) {
+                        return new HtmlString('');
+                    }
+                    if (! empty($tenant->custom_domain)) {
+                        $url = 'https://' . trim($tenant->custom_domain, '/');
+                    } else {
+                        $domain = $tenant->subdomain ?? $tenant->domain ?? '';
+                        $base = rtrim(config('app.storefront_url', 'http://187.77.68.2:3000'), '/');
+                        $url = $domain ? $base . '?domain=' . $domain : $base;
+                    }
 
                     return new HtmlString(view('filament.seller.partials.view-store-button', [
                         'url' => $url,

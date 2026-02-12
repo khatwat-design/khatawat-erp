@@ -2,6 +2,7 @@
 
 namespace App\Filament\Seller\Resources\Orders\Schemas;
 
+use App\Enums\OrderStatus;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -38,15 +39,19 @@ class OrderForm
                             ->label('رقم الطلب')
                             ->disabled(),
                         Select::make('status')
-                            ->label('الحالة')
-                            ->options([
-                                'pending' => 'قيد الانتظار',
-                                'processing' => 'قيد المعالجة',
-                                'shipped' => 'تم الشحن',
-                                'completed' => 'مكتمل',
-                                'cancelled' => 'ملغي',
-                            ])
-                            ->required(),
+                            ->label('حالة الطلب')
+                            ->options(OrderStatus::options())
+                            ->required()
+                            ->native(false),
+                        TextInput::make('tracking_number')
+                            ->label('رقم التتبع')
+                            ->placeholder('أدخل رقم التتبع من شركة الشحن')
+                            ->maxLength(255),
+                        Textarea::make('seller_notes')
+                            ->label('ملاحظات التاجر')
+                            ->rows(2)
+                            ->placeholder('ملاحظات داخلية')
+                            ->columnSpanFull(),
                         TextInput::make('total_amount')
                             ->label('الإجمالي')
                             ->disabled()

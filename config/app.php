@@ -56,6 +56,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Storefront URL (Next.js Store)
+    |--------------------------------------------------------------------------
+    |
+    | Base URL for the deployed Next.js storefront. Used by the "View Store"
+    | button in the seller panel. Set STOREFRONT_URL in .env if different.
+    |
+    */
+
+    'storefront_url' => env('STOREFRONT_URL', 'http://187.77.68.2:3000'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

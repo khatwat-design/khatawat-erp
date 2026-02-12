@@ -12,6 +12,8 @@ return [
         'http://127.0.0.1:3002',
         'http://187.77.68.2:3000',
         'http://187.77.68.2:3001',
+        'https://store.khtwat.com',
+        'http://store.khtwat.com',
         'https://khtwat.com',
         'https://www.khtwat.com',
         'http://khtwat.com',
@@ -22,6 +24,7 @@ return [
     ])),
     'allowed_origins_patterns' => [
         '#^https://[a-z0-9-]+\.khatawat\.com$#', // *.khatawat.com subdomains
+        '#^https?://[a-z0-9-]+\.khtwat\.com$#',  // *.khtwat.com subdomains
     ],
     'allowed_headers' => ['*'],
     'exposed_headers' => [],

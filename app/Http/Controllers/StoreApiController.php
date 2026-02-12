@@ -53,7 +53,11 @@ class StoreApiController extends Controller
 
         $branding = $store->branding_config ?? [];
         $logoPath = $store->logo_url ?: ($branding['logo_url'] ?? null);
-        $logoUrl = $logoPath ? asset('storage/' . $logoPath) : null;
+        $logoUrl = $logoPath
+            ? (str_starts_with($logoPath, 'http://') || str_starts_with($logoPath, 'https://')
+                ? $logoPath
+                : asset('storage/' . ltrim($logoPath, '/')))
+            : null;
 
         $settings = is_array($store->settings) ? $store->settings : [];
 
@@ -61,8 +65,8 @@ class StoreApiController extends Controller
             'name' => $store->name,
             'store_name' => $store->name,
             'logo_url' => $logoUrl,
-            'brand_color' => $branding['primary_color'] ?? null,
-            'currency' => $branding['currency'] ?? null,
+            'brand_color' => $branding['primary_color'] ?? $branding['brand_color'] ?? '#F97316',
+            'currency' => $branding['currency'] ?? 'IQD',
             'shipping_cost' => $settings['shipping_cost'] ?? 0,
             'facebook_pixel_id' => $store->facebook_pixel_id,
             'tiktok_pixel_id' => $store->tiktok_pixel_id,
