@@ -1,0 +1,92 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+class OrderController extends Controller
+{
+    public function store(Request $request)
+    {
+        // 1. Validation
+        $validated = $request->validate([
+            'customer_first_name' => 'required|string',
+            'customer_last_name' => 'required|string',
+            'phone' => 'required|string',
+            'address' => 'required|string', // Will receive "Baghdad - Street 40"
+            'items' => 'required|array',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // 2. Create Order Wrapper
+            $order = Order::create([
+                'order_number' => 'ORD-' . strtoupper(Str::random(10)),
+                'customer_first_name' => $validated['customer_first_name'],
+                'customer_last_name' => $validated['customer_last_name'],
+                'phone' => $validated['phone'],
+                'address' => $validated['address'],
+                'total_price' => 0, // Will update later
+                'status' => 'pending',
+                'payment_status' => 'pending',
+                // Ensure tenant/store ID is handled by your scope or middleware
+            ]);
+
+            $total = 0;
+
+            // 3. Process Items
+            foreach ($validated['items'] as $itemData) {
+                $product = Product::lockForUpdate()->find($itemData['product_id']);
+
+                if (!$product) {
+                    throw new \Exception("Product not found");
+                }
+
+                // Check Stock (if managed)
+                if (!is_null($product->stock) && $product->stock < $itemData['quantity']) {
+                    throw new \Exception("Insufficient stock for product: {$product->name}");
+                }
+
+                // Deduct Stock
+                if (!is_null($product->stock)) {
+                    $product->decrement('stock', $itemData['quantity']);
+                }
+
+                // Create Order Item
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'quantity' => $itemData['quantity'],
+                    'price' => $product->price,
+                ]);
+
+                $total += $product->price * $itemData['quantity'];
+            }
+
+            // 4. Update Final Total
+            $order->update(['total_price' => $total]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Order created successfully',
+                'order_id' => $order->id
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 400);
+        }
+    }
+}

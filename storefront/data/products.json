@@ -1,0 +1,56 @@
+[
+  {
+    "id": "smart-1",
+    "name": "سماعات بلوتوث برو",
+    "description": "صوت محيطي، عزل ضوضاء، وبطارية تدوم طوال اليوم.",
+    "price": 49000,
+    "badge": "الأكثر طلباً",
+    "category": "إلكترونيات",
+    "image": "/products/smart-1.svg"
+  },
+  {
+    "id": "home-1",
+    "name": "مقلاة هوائية ذكية",
+    "description": "طهي صحي بسرعة مع برامج طهي متعددة وشاشة لمس.",
+    "price": 85000,
+    "badge": "جديد",
+    "category": "المنزل",
+    "image": "/products/home-1.svg"
+  },
+  {
+    "id": "beauty-1",
+    "name": "مجموعة عناية بالبشرة",
+    "description": "روتين صباحي ومسائي لبشرة أكثر نضارة وترطيب.",
+    "price": 42000,
+    "badge": "مميز",
+    "category": "الجمال",
+    "image": "/products/beauty-1.svg"
+  },
+  {
+    "id": "fashion-1",
+    "name": "ساعة ذكية أنيقة",
+    "description": "متابعة اللياقة، إشعارات فورية، وتصميم فاخر.",
+    "price": 76000,
+    "badge": "رائج",
+    "category": "أزياء",
+    "image": "/products/fashion-1.svg"
+  },
+  {
+    "id": "office-1",
+    "name": "حقيبة عمل جلدية",
+    "description": "مساحات منظمة للأجهزة والإكسسوارات مع خامات فاخرة.",
+    "price": 59000,
+    "badge": "عرض خاص",
+    "category": "العمل",
+    "image": "/products/office-1.svg"
+  },
+  {
+    "id": "kids-1",
+    "name": "ألعاب تعليمية تفاعلية",
+    "description": "تعلم ممتع للأطفال مع تحديات يومية آمنة.",
+    "price": 28000,
+    "badge": "مفضل للأطفال",
+    "category": "الأطفال",
+    "image": "/products/kids-1.svg"
+  }
+]

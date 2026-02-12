@@ -1,0 +1,16 @@
+# ========== Production (use in .env.production or Hostinger env) ==========
+# Laravel API base URL (no trailing slash). Required for store + checkout.
+NEXT_PUBLIC_API_URL=https://your-api-domain.com
+# Storefront public URL (metadata, OpenGraph)
+NEXT_PUBLIC_SITE_URL=https://your-storefront-domain.com
+# Store API key from Laravel (if your backend requires it)
+NEXT_PUBLIC_STORE_API_KEY=
+
+# ========== Optional / Shared ==========
+# Telegram Bot Configuration
+TELEGRAM_BOT_TOKEN=your_bot_token_here
+TELEGRAM_CHANNEL_ID=your_channel_id_here
+# Google Apps Script Configuration
+GOOGLE_APPS_SCRIPT_URL=https://script.google.com/macros/s/ABC123.../exec
+# Admin Dashboard (Optional)
+ADMIN_DASHBOARD_TOKEN=your_admin_token_here
