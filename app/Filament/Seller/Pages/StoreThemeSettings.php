@@ -24,6 +24,8 @@ class StoreThemeSettings extends Page
     protected static ?string $title = 'مظهر المتجر';
     protected static ?string $slug = 'theme-settings';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public function mount(): void
     {
         $store = Filament::getTenant();

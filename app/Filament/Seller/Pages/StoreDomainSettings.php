@@ -25,6 +25,8 @@ class StoreDomainSettings extends Page
     protected static ?string $title = 'ربط دومينك الخاص';
     protected static ?string $slug = 'domain-settings';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public function mount(): void
     {
         $store = Filament::getTenant();

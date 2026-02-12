@@ -23,6 +23,8 @@ class StoreIntegrationsSettings extends Page
     protected static ?string $title = 'إعدادات التكاملات';
     protected static ?string $slug = 'integrations-settings';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     public function mount(): void
     {
         $store = Filament::getTenant();

@@ -5,7 +5,7 @@ namespace App\Filament\Seller\Resources\Orders\Tables;
 use App\Filament\Exports\OrderExporter;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
