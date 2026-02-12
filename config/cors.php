@@ -6,8 +6,12 @@ return [
     'allowed_origins' => array_values(array_filter([
         'http://localhost:3000',
         'http://localhost:3001',
+        'http://localhost:3002',
         'http://127.0.0.1:3000',
         'http://127.0.0.1:3001',
+        'http://127.0.0.1:3002',
+        'http://187.77.68.2:3000',
+        'http://187.77.68.2:3001',
         env('APP_ENV') === 'production' ? 'https://khatawat.com' : null,
         env('APP_ENV') === 'production' ? 'https://www.khatawat.com' : null,
         env('APP_ENV') === 'production' ? 'https://store.khatawat.com' : null,
