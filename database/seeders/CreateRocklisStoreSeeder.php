@@ -10,17 +10,19 @@ class CreateRocklisStoreSeeder extends Seeder
 {
     public function run(): void
     {
-        $store = Store::create([
-            'name' => 'روكلس',
-            'slug' => 'rocklis',
-            'subdomain' => 'rocklis',
-            'status' => 'active',
-            'branding_config' => [
-                'primary_color' => '#F97316',
-                'currency' => 'IQD',
-                'logo_url' => null,
-            ],
-        ]);
+        $store = Store::firstOrCreate(
+            ['subdomain' => 'rocklis'],
+            [
+                'name' => 'روكلس',
+                'slug' => 'rocklis',
+                'status' => 'active',
+                'branding_config' => [
+                    'primary_color' => '#F97316',
+                    'currency' => 'IQD',
+                    'logo_url' => null,
+                ],
+            ]
+        );
 
         $user = User::firstOrNew(['email' => 'tajer@rocklis.com']);
         $user->name = 'تاجر روكلس';
