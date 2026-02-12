@@ -31,8 +31,6 @@ class StoreSettings extends Page
 
     protected static ?string $slug = 'settings';
 
-    protected static ?string $navigationGroup = null;
-
     protected static ?int $navigationSort = 100;
 
     public function mount(): void
