@@ -79,9 +79,9 @@ class SubscriptionPlanResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => \Filament\Resources\Pages\ListRecords::route('/'),
-            'create' => \Filament\Resources\Pages\CreateRecord::route('/create'),
-            'edit' => \Filament\Resources\Pages\EditRecord::route('/{record}/edit'),
+            'index' => \App\Filament\Admin\Resources\SubscriptionPlanResource\Pages\ListSubscriptionPlans::route('/'),
+            'create' => \App\Filament\Admin\Resources\SubscriptionPlanResource\Pages\CreateSubscriptionPlan::route('/create'),
+            'edit' => \App\Filament\Admin\Resources\SubscriptionPlanResource\Pages\EditSubscriptionPlan::route('/{record}/edit'),
         ];
     }
 }

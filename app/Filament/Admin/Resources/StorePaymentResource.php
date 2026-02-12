@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources;
 
+use App\Filament\Admin\Resources\StorePaymentResource\Pages;
 use App\Models\StorePayment;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -87,9 +88,9 @@ class StorePaymentResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => \Filament\Resources\Pages\ListRecords::route('/'),
-            'create' => \Filament\Resources\Pages\CreateRecord::route('/create'),
-            'edit' => \Filament\Resources\Pages\EditRecord::route('/{record}/edit'),
+            'index' => Pages\ListStorePayments::route('/'),
+            'create' => Pages\CreateStorePayment::route('/create'),
+            'edit' => Pages\EditStorePayment::route('/{record}/edit'),
         ];
     }
 }

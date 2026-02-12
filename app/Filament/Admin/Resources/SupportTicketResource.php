@@ -88,10 +88,10 @@ class SupportTicketResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => \Filament\Resources\Pages\ListRecords::route('/'),
-            'create' => \Filament\Resources\Pages\CreateRecord::route('/create'),
-            'view' => \Filament\Resources\Pages\ViewRecord::route('/{record}'),
-            'edit' => \Filament\Resources\Pages\EditRecord::route('/{record}/edit'),
+            'index' => \App\Filament\Admin\Resources\SupportTicketResource\Pages\ListSupportTickets::route('/'),
+            'create' => \App\Filament\Admin\Resources\SupportTicketResource\Pages\CreateSupportTicket::route('/create'),
+            'view' => \App\Filament\Admin\Resources\SupportTicketResource\Pages\ViewSupportTicket::route('/{record}'),
+            'edit' => \App\Filament\Admin\Resources\SupportTicketResource\Pages\EditSupportTicket::route('/{record}/edit'),
         ];
     }
 }
