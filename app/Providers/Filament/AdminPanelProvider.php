@@ -7,6 +7,12 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use App\Filament\Admin\Pages\Dashboard;
+use App\Filament\Admin\Resources\BroadcastResource;
+use App\Filament\Admin\Resources\Stores\StoreResource;
+use App\Filament\Admin\Resources\StorePaymentResource;
+use App\Filament\Admin\Resources\SubscriptionPlanResource;
+use App\Filament\Admin\Resources\SupportTicketResource;
+use App\Filament\Admin\Resources\Users\UserResource;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -39,7 +45,14 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::hex('#F97316'),
                 'gray' => Color::Zinc,
             ])
-            ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
+            ->resources([
+                StoreResource::class,
+                UserResource::class,
+                SubscriptionPlanResource::class,
+                StorePaymentResource::class,
+                SupportTicketResource::class,
+                BroadcastResource::class,
+            ])
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
             ->pages([
                 Dashboard::class,
