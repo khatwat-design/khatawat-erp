@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -91,6 +92,53 @@ class StorefrontController extends Controller
             ->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');
+    }
+
+    public function validateCoupon(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'code' => ['required', 'string', 'max:50'],
+            'subtotal' => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $store = app()->bound('currentStore')
+            ? app('currentStore')
+            : null;
+        if (! $store) {
+            return response()->json(['message' => 'Store not found'], 404);
+        }
+
+        $coupon = Coupon::query()
+            ->where('store_id', $store->id)
+            ->where('code', $validated['code'])
+            ->first();
+
+        if (! $coupon || ! $coupon->isValid()) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'الكود غير صالح أو منتهي الصلاحية',
+            ], 422);
+        }
+
+        $subtotal = (float) $validated['subtotal'];
+        if ($coupon->min_order_amount && $subtotal < (float) $coupon->min_order_amount) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'الحد الأدنى للطلب: ' . number_format($coupon->min_order_amount) . ' ' . ($store->branding_config['currency'] ?? 'IQD'),
+            ], 422);
+        }
+
+        $discount = match ($coupon->discount_type) {
+            'fixed' => min((float) $coupon->discount_value, $subtotal),
+            default => $subtotal * ((float) $coupon->discount_value / 100),
+        };
+
+        return response()->json([
+            'valid' => true,
+            'discount' => round($discount, 2),
+            'discount_type' => $coupon->discount_type,
+            'discount_value' => (float) $coupon->discount_value,
+        ]);
     }
 
     public function createOrder(Request $request): JsonResponse
@@ -183,9 +231,34 @@ class StorefrontController extends Controller
                 ];
             }
 
+            $couponDiscount = 0;
+            if (! empty($validated['coupon_code'])) {
+                $coupon = Coupon::query()
+                    ->where('store_id', $store->id)
+                    ->where('code', $validated['coupon_code'])
+                    ->lockForUpdate()
+                    ->first();
+                if ($coupon && $coupon->isValid()) {
+                    $minAmount = $coupon->min_order_amount ? (float) $coupon->min_order_amount : 0;
+                    if ($total >= $minAmount) {
+                        $couponDiscount = match ($coupon->discount_type) {
+                            'fixed' => min((float) $coupon->discount_value, $total),
+                            default => $total * ((float) $coupon->discount_value / 100),
+                        };
+                        $coupon->increment('used_count');
+                    }
+                }
+            }
+
+            $total = max(0, $total - $couponDiscount);
+
             $order->update([
                 'total_amount' => $total,
-                'order_details' => ['items' => $itemsSnapshot],
+                'order_details' => [
+                    'items' => $itemsSnapshot,
+                    'coupon_discount' => $couponDiscount,
+                    'coupon_code' => $validated['coupon_code'] ?? null,
+                ],
             ]);
 
             DB::commit();

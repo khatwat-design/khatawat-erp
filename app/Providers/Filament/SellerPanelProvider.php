@@ -40,8 +40,8 @@ class SellerPanelProvider extends PanelProvider
             ->sidebarCollapsibleOnDesktop()
             ->sidebarWidth('18rem')
             ->colors([
-                'primary' => Color::Amber,
-                'gray' => Color::Slate,
+                'primary' => Color::hex('#F97316'),
+                'gray' => Color::Zinc,
             ])
             ->discoverResources(in: app_path('Filament/Seller/Resources'), for: 'App\Filament\Seller\Resources')
             ->discoverPages(in: app_path('Filament/Seller/Pages'), for: 'App\Filament\Seller\Pages')

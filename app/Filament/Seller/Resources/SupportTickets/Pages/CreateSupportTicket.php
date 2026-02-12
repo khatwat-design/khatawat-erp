@@ -18,6 +18,7 @@ class CreateSupportTicket extends CreateRecord
             $data['store_id'] = $tenant->id;
             $data['user_id'] = $user->id;
         }
+        $data['status'] = $data['status'] ?? 'open';
         return $data;
     }
 }

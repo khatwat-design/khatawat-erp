@@ -10,6 +10,7 @@ Route::prefix('store')->group(function (): void {
     Route::get('/', [StoreApiController::class, 'index']);
     Route::get('/products', [StoreApiController::class, 'products']);
     Route::get('/products/{id}', [StoreApiController::class, 'showProduct']);
+    Route::get('/banners', [StoreApiController::class, 'banners']);
     Route::post('/orders', [StoreApiController::class, 'createOrder']);
 });
 
@@ -18,6 +19,7 @@ Route::post('/orders', [OrderController::class, 'store']);
 Route::prefix('storefront')->group(function (): void {
     Route::get('/settings', [StorefrontController::class, 'getSettings']);
     Route::get('/products', [StorefrontController::class, 'getProducts']);
+    Route::post('/validate-coupon', [StorefrontController::class, 'validateCoupon']);
     Route::post('/orders', [StorefrontController::class, 'createOrder']);
 });
 

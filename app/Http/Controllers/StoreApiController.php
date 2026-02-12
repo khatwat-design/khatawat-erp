@@ -117,6 +117,35 @@ class StoreApiController extends Controller
         return $this->withDebugHeader(response()->json($products));
     }
 
+    public function banners(Request $request): JsonResponse
+    {
+        $store = $this->getStore($request);
+        if ($store instanceof JsonResponse) {
+            return $store;
+        }
+
+        $banners = $store->banners()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get(['id', 'image_url', 'link', 'position', 'sort_order'])
+            ->map(function ($banner): array {
+                $imageUrl = $banner->image_url
+                    ? (str_starts_with($banner->image_url, 'http')
+                        ? $banner->image_url
+                        : asset('storage/' . ltrim($banner->image_url, '/')))
+                    : null;
+
+                return [
+                    'id' => $banner->id,
+                    'image_url' => $imageUrl,
+                    'link' => $banner->link,
+                    'position' => $banner->position,
+                ];
+            });
+
+        return $this->withDebugHeader(response()->json($banners));
+    }
+
     public function showProduct(Request $request, int $productId): JsonResponse
     {
         $store = $this->getStore($request);
