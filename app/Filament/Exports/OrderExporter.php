@@ -5,6 +5,7 @@ namespace App\Filament\Exports;
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use Carbon\Carbon;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
@@ -13,6 +14,16 @@ use Illuminate\Support\Number;
 class OrderExporter extends Exporter
 {
     protected static ?string $model = Order::class;
+
+    public function getJobConnection(): ?string
+    {
+        return 'sync';
+    }
+
+    public function getFormats(): array
+    {
+        return [ExportFormat::Xlsx];
+    }
 
     public static function getColumns(): array
     {

@@ -71,6 +71,13 @@ class StoreIntegrationsSettings extends Page
                             ->placeholder('https://script.google.com/macros/s/xxxxx/exec')
                             ->url()
                             ->helperText('الصق رابط Web App بعد نشر السكربت في Google Apps Script.'),
+                        Action::make('copy_app_script')
+                            ->label('نسخ كود App Script')
+                            ->icon('heroicon-o-clipboard-document')
+                            ->color('gray')
+                            ->action(function (): void {
+                                $this->copyAppScriptToClipboard();
+                            }),
                         Placeholder::make('google_sheets_instructions')
                             ->label('')
                             ->content(new \Illuminate\Support\HtmlString(
@@ -81,9 +88,16 @@ class StoreIntegrationsSettings extends Page
             ]);
     }
 
-    protected function getGoogleSheetsInstructionsHtml(): string
+    public function copyAppScriptToClipboard(): void
     {
-        $script = <<<'SCRIPT'
+        $script = $this->getGoogleSheetsAppScriptCode();
+        $encoded = json_encode($script);
+        $this->js("navigator.clipboard.writeText({$encoded}).then(function(){new FilamentNotification().success().title('تم نسخ الكود').send();}).catch(function(){new FilamentNotification().danger().title('فشل النسخ').send();});");
+    }
+
+    protected function getGoogleSheetsAppScriptCode(): string
+    {
+        return <<<'SCRIPT'
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
@@ -109,7 +123,11 @@ function doPost(e) {
   }
 }
 SCRIPT;
+    }
 
+    protected function getGoogleSheetsInstructionsHtml(): string
+    {
+        $script = $this->getGoogleSheetsAppScriptCode();
         $escapedScript = htmlspecialchars($script, ENT_QUOTES, 'UTF-8');
 
         return '<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 text-sm text-gray-700 dark:text-gray-300 space-y-3">' .

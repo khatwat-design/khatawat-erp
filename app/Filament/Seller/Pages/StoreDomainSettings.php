@@ -66,9 +66,14 @@ class StoreDomainSettings extends Page
                         Placeholder::make('subdomain')
                             ->label('معرف المتجر')
                             ->content(fn () => $this->data['subdomain'] ?? '—'),
-                        Placeholder::make('store_url')
+                                        Placeholder::make('store_url')
                             ->label('رابط المتجر الحالي')
                             ->content(fn () => $this->data['store_url'] ?? '—'),
+                        Action::make('view_store_domain')
+                            ->label('عرض المتجر')
+                            ->icon('heroicon-o-arrow-top-right-on-square')
+                            ->url(fn () => $this->data['store_url'] ?? '#', shouldOpenInNewTab: true)
+                            ->visible(fn () => ! empty($this->data['store_url']) && ($this->data['store_url'] ?? '') !== '#'),
                     ])
                     ->columns(1),
                 Section::make('ربط دومينك الخاص')

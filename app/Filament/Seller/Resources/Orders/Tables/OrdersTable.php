@@ -93,7 +93,7 @@ class OrdersTable
             ->headerActions([
                 ExportAction::make()
                     ->exporter(OrderExporter::class)
-                    ->label('تصدير الكل'),
+                    ->label('تصدير Excel'),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
