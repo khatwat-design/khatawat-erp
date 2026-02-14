@@ -4,11 +4,12 @@ namespace App\Filament\Seller\Resources\Orders\Tables;
 
 use App\Enums\OrderStatus;
 use App\Filament\Exports\OrderExporter;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\EditAction;
 use Filament\Actions\ExportAction;
-use Filament\Actions\Action;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\ExportBulkAction;
+use Filament\Actions\ExportBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -99,7 +100,7 @@ class OrdersTable
                     ExportBulkAction::make()
                         ->exporter(OrderExporter::class)
                         ->label('تصدير المحدد'),
-                    \Filament\Tables\Actions\BulkAction::make('change_status')
+                    BulkAction::make('change_status')
                         ->label('تغيير الحالة')
                         ->icon('heroicon-o-arrow-path')
                         ->form([
