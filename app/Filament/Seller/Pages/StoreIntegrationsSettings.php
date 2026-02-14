@@ -74,7 +74,7 @@ class StoreIntegrationsSettings extends Page
                             ->helperText('اضغط على زر إعداد Google Sheets لنسخ الكود وإعداد الربط.'),
                         Action::make('open_google_sheets_modal')
                             ->label('إعداد Google Sheets')
-                            ->icon('heroicon-o-document-code')
+                            ->icon('heroicon-o-clipboard-document')
                             ->color('gray')
                             ->modalHeading('ربط Google Sheets')
                             ->modalWidth('2xl')

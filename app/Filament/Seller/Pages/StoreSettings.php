@@ -215,7 +215,7 @@ class StoreSettings extends Page
                                     ->schema([
                                         Action::make('open_google_sheets_modal')
                                             ->label('إظهار كود App Script')
-                                            ->icon('heroicon-o-document-code')
+                                            ->icon('heroicon-o-clipboard-document')
                                             ->color('gray')
                                             ->modalHeading('ربط Google Sheets')
                                             ->modalWidth('2xl')
