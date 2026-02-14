@@ -14,6 +14,7 @@ use Filament\Schemas\Components\EmbeddedSchema;
 use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Http;
 
 class StoreIntegrationsSettings extends Page
 {
@@ -70,29 +71,123 @@ class StoreIntegrationsSettings extends Page
                             ->label('رابط Web App (App Script)')
                             ->placeholder('https://script.google.com/macros/s/xxxxx/exec')
                             ->url()
-                            ->helperText('الصق رابط Web App بعد نشر السكربت في Google Apps Script.'),
-                        Action::make('copy_app_script')
-                            ->label('نسخ كود App Script')
-                            ->icon('heroicon-o-clipboard-document')
+                            ->helperText('اضغط على زر إعداد Google Sheets لنسخ الكود وإعداد الربط.'),
+                        Action::make('open_google_sheets_modal')
+                            ->label('إعداد Google Sheets')
+                            ->icon('heroicon-o-document-code')
                             ->color('gray')
-                            ->action(function (): void {
-                                $this->copyAppScriptToClipboard();
+                            ->modalHeading('ربط Google Sheets')
+                            ->modalWidth('2xl')
+                            ->modalSubmitActionLabel('حفظ')
+                            ->modalCancelActionLabel('إغلاق')
+                            ->fillForm(fn (): array => [
+                                'google_sheets_webhook_url' => Filament::getTenant()?->google_sheets_webhook_url ?? '',
+                            ])
+                            ->form([
+                                Placeholder::make('app_script_code')
+                                    ->label('')
+                                    ->content(new \Illuminate\Support\HtmlString(
+                                        $this->getGoogleSheetsModalContent()
+                                    )),
+                                TextInput::make('google_sheets_webhook_url')
+                                    ->label('رابط Web App (بعد النشر)')
+                                    ->placeholder('https://script.google.com/macros/s/xxxxx/exec')
+                                    ->url(),
+                            ])
+                            ->extraModalFooterActions([
+                                Action::make('test_google_sheets')
+                                    ->label('اختبار الإرسال')
+                                    ->icon('heroicon-o-signal')
+                                    ->color('gray')
+                                    ->action(function (): void {
+                                        $data = $this->mountedActions[array_key_last($this->mountedActions)]['data'] ?? [];
+                                        $url = trim($data['google_sheets_webhook_url'] ?? '');
+                                        if (empty($url)) {
+                                            Notification::make()->danger()->title('أدخل الرابط أولاً')->send();
+
+                                            return;
+                                        }
+                                        $ok = $this->testGoogleSheetsWebhook($url);
+                                        if ($ok) {
+                                            Notification::make()->success()->title('تم الإرسال بنجاح! تحقق من الجدول.')->send();
+                                        } else {
+                                            Notification::make()->danger()->title('فشل الاختبار. تحقق من الرابط والإعدادات.')->send();
+                                        }
+                                    }),
+                            ])
+                            ->action(function (array $data): void {
+                                $this->saveGoogleSheetsFromModal($data);
                             }),
-                        Placeholder::make('google_sheets_instructions')
-                            ->label('')
-                            ->content(new \Illuminate\Support\HtmlString(
-                                $this->getGoogleSheetsInstructionsHtml()
-                            )),
                     ])
                     ->columns(1),
             ]);
     }
 
-    public function copyAppScriptToClipboard(): void
+    protected function getGoogleSheetsModalContent(): string
     {
         $script = $this->getGoogleSheetsAppScriptCode();
-        $encoded = json_encode($script);
-        $this->js("navigator.clipboard.writeText({$encoded}).then(function(){new FilamentNotification().success().title('تم نسخ الكود').send();}).catch(function(){new FilamentNotification().danger().title('فشل النسخ').send();});");
+        $escaped = htmlspecialchars($script, ENT_QUOTES, 'UTF-8');
+        $escapedJson = json_encode($script);
+
+        return '<div class="space-y-4 mb-4" dir="rtl" x-data="{ copied: false }">' .
+            '<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">' .
+            '<div class="flex items-center justify-between mb-2">' .
+            '<span class="text-sm font-medium text-gray-700 dark:text-gray-300">كود App Script</span>' .
+            '<button type="button" @click="navigator.clipboard.writeText(' . $escapedJson . ').then(() => { copied = true; setTimeout(() => copied = false, 2000); new FilamentNotification().success().title(\'تم النسخ\').send(); })" ' .
+            'class="fi-btn relative grid-flow-col items-center justify-center font-semibold outline-none transition duration-75 focus-visible:ring-2 rounded-lg fi-btn-color-gray fi-btn-size-sm gap-1.5 px-3 py-2 text-sm inline-grid shadow-sm bg-transparent border border-gray-200 dark:border-white/10 text-gray-950 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5">' .
+            '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>' .
+            '<span x-text="copied ? \'تم النسخ!\' : \'نسخ\'">نسخ</span>' .
+            '</button></div>' .
+            '<pre class="p-3 bg-gray-900 dark:bg-gray-950 text-gray-100 text-xs rounded overflow-x-auto max-h-48 overflow-y-auto" dir="ltr"><code>' . $escaped . '</code></pre>' .
+            '</div>' .
+            '<p class="text-sm text-gray-600 dark:text-gray-400">١. انسخ الكود والصقه في ملف Code.gs في Google Apps Script<br>٢. احفظ ثم: نشر ← نشر كتطبيق ويب ← اختر "وصول: أي شخص"<br>٣. انسخ رابط النشر والصقه أدناه</p>' .
+            '</div>';
+    }
+
+    public function saveGoogleSheetsFromModal(array $data): void
+    {
+        $store = Filament::getTenant();
+        if (! $store) {
+            return;
+        }
+        $url = trim($data['google_sheets_webhook_url'] ?? '') ?: null;
+        $store->update(['google_sheets_webhook_url' => $url]);
+        $this->form->fill(['google_sheets_webhook_url' => $url ?? '']);
+        Notification::make()->success()->title('تم الحفظ')->send();
+        $this->unmountAction();
+    }
+
+    public function testGoogleSheetsWebhook(string $url): bool
+    {
+        $store = Filament::getTenant();
+        if (! $store || empty($url)) {
+            return false;
+        }
+        $payload = [
+            'store_id' => $store->id,
+            'store_name' => $store->name,
+            'order_id' => 0,
+            'order_number' => 'TEST-' . time(),
+            'customer_name' => 'عميل تجريبي',
+            'customer_phone' => '07xx',
+            'address' => 'عنوان تجريبي',
+            'subtotal' => 10000,
+            'discount_amount' => 0,
+            'shipping_cost' => 2000,
+            'total_amount' => 12000,
+            'status' => 'pending',
+            'items' => [['product_id' => 0, 'name' => 'منتج تجريبي', 'price' => 10000, 'quantity' => 1, 'line_total' => 10000]],
+            'created_at' => now()->toIso8601String(),
+        ];
+        try {
+            $response = Http::timeout(10)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->post($url, $payload);
+
+            return $response->successful();
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     protected function getGoogleSheetsAppScriptCode(): string
@@ -123,25 +218,6 @@ function doPost(e) {
   }
 }
 SCRIPT;
-    }
-
-    protected function getGoogleSheetsInstructionsHtml(): string
-    {
-        $script = $this->getGoogleSheetsAppScriptCode();
-        $escapedScript = htmlspecialchars($script, ENT_QUOTES, 'UTF-8');
-
-        return '<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-4 text-sm text-gray-700 dark:text-gray-300 space-y-3">' .
-            '<p class="font-medium">كيفية الربط:</p>' .
-            '<ol class="list-decimal list-inside space-y-1">' .
-            '<li>أنشئ جدول Google جديد</li>' .
-            '<li>من القائمة: الإضافات → محرّر السكربتات</li>' .
-            '<li>انسخ الكود أدناه والصقه في الملف Code.gs</li>' .
-            '<li>احفظ ثم: نشر → نشر كتطبيق ويب → اختر "وصول: أي شخص"</li>' .
-            '<li>انسخ رابط النشر والصقه أعلاه</li>' .
-            '</ol>' .
-            '<details class="mt-3"><summary class="cursor-pointer font-medium text-primary-600">عرض كود App Script</summary>' .
-            '<pre class="mt-2 p-3 bg-gray-900 text-gray-100 text-xs rounded overflow-x-auto" dir="ltr"><code>' . $escapedScript . '</code></pre>' .
-            '</details></div>';
     }
 
     public function save(): void

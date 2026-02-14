@@ -216,12 +216,7 @@ class StoreSettings extends Page
                                             ->label('رابط Web App (App Script)')
                                             ->placeholder('https://script.google.com/macros/s/xxxxx/exec')
                                             ->url()
-                                            ->helperText('انسخ كود App Script من زر التكاملات، الصقه في Google Apps Script، انشر كتطبيق ويب، ثم الصق الرابط هنا.'),
-                                        Action::make('copy_app_script_settings')
-                                            ->label('نسخ كود App Script')
-                                            ->icon('heroicon-o-clipboard-document')
-                                            ->color('gray')
-                                            ->action(fn () => $this->copyAppScriptToClipboard()),
+                                            ->helperText('لإعداد الربط الكامل (كود + اختبار)، اذهب إلى الإعدادات ← التكاملات.'),
                                     ])
                                     ->columns(1),
                             ]),
@@ -298,43 +293,6 @@ class StoreSettings extends Page
             ->success()
             ->title('تم حفظ الإعدادات')
             ->send();
-    }
-
-    public function copyAppScriptToClipboard(): void
-    {
-        $script = $this->getGoogleSheetsAppScriptCode();
-        $encoded = json_encode($script);
-        $this->js("navigator.clipboard.writeText({$encoded}).then(function(){new FilamentNotification().success().title('تم نسخ الكود').send();}).catch(function(){new FilamentNotification().danger().title('فشل النسخ').send();});");
-    }
-
-    protected function getGoogleSheetsAppScriptCode(): string
-    {
-        return <<<'SCRIPT'
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var headers = ['تاريخ الطلب','رقم الطلب','العميل','الهاتف','العنوان','المجموع الفرعي','الخصم','الشحن','الإجمالي','الحالة'];
-    if (sheet.getLastRow() === 0) sheet.appendRow(headers);
-    var row = [
-      data.created_at || '',
-      data.order_number || data.order_id,
-      data.customer_name || '',
-      data.customer_phone || '',
-      data.address || '',
-      data.subtotal || 0,
-      data.discount_amount || 0,
-      data.shipping_cost || 0,
-      data.total_amount || 0,
-      data.status || ''
-    ];
-    sheet.appendRow(row);
-    return ContentService.createTextOutput(JSON.stringify({success: true})).setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({success: false, error: err.toString()})).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-SCRIPT;
     }
 
     public function resetLogo(): void
