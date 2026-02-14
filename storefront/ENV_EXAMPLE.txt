@@ -3,6 +3,8 @@
 NEXT_PUBLIC_API_URL=https://your-api-domain.com
 # Storefront public URL (metadata, OpenGraph)
 NEXT_PUBLIC_SITE_URL=https://your-storefront-domain.com
+# Main SaaS domain for multi-tenant routing (e.g. khatawat.com). Used by middleware to detect subdomain vs custom domain.
+NEXT_PUBLIC_MAIN_DOMAIN=khatawat.com
 # Store API key from Laravel (if your backend requires it)
 NEXT_PUBLIC_STORE_API_KEY=
 

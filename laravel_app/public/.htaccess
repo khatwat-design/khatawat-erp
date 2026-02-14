@@ -1,3 +1,12 @@
+# PHP upload limits (only when PHP runs as Apache module - mod_php)
+# If using PHP-FPM/CGI, use .user.ini instead
+<IfModule mod_php.c>
+    php_value upload_max_filesize 12M
+    php_value post_max_size 12M
+    php_value memory_limit 256M
+    php_value max_execution_time 120
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
