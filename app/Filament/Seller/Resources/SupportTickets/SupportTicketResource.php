@@ -29,7 +29,12 @@ class SupportTicketResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'المساعدة';
+        return 'الإعدادات';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 3;
     }
 
     public static function form(Schema $schema): Schema

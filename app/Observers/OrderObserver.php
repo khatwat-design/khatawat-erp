@@ -78,11 +78,11 @@ class OrderObserver
         $items = $order->order_details['items'] ?? [];
         $n = 1;
         foreach ($items as $item) {
-            $name = $this->escapeHtml($item['name'] ?? '—');
+            $name = $this->escapeHtml($item['name'] ?? $item['product_name'] ?? $item['title'] ?? '—');
             $price = $fmt($item['price'] ?? 0);
             $qty = (int) ($item['quantity'] ?? 0);
             $lineTotal = $fmt($item['line_total'] ?? 0);
-            $text .= "{$n}. {$name}\n";
+            $text .= "{$n}. <b>" . $name . "</b>\n";
             $text .= "   السعر: {$price} د.ع × {$qty} = {$lineTotal} د.ع\n\n";
             $n++;
         }
@@ -114,6 +114,6 @@ class OrderObserver
             return;
         }
 
-        PushOrderToGoogleSheetsJob::dispatch($order);
+        PushOrderToGoogleSheetsJob::dispatchSync($order);
     }
 }

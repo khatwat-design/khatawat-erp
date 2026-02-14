@@ -38,6 +38,16 @@ class WalletTransactionResource extends Resource
         return 'المالية';
     }
 
+    public static function getNavigationBadge(): ?string
+    {
+        return 'قيد التطوير';
+    }
+
+    public static function getNavigationBadgeColor(): ?string
+    {
+        return 'warning';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return WalletTransactionForm::configure($schema);

@@ -19,11 +19,11 @@ class StoreBilling extends Page
     protected static ?string $navigationLabel = 'الاشتراك والفواتير';
     protected static ?string $title = 'باقتك والاشتراك';
     protected static ?string $slug = 'billing';
-    protected static ?int $navigationSort = 90;
+    protected static ?int $navigationSort = 2;
 
     public static function getNavigationGroup(): ?string
     {
-        return 'المالية';
+        return 'الإعدادات';
     }
 
     public function content(Schema $schema): Schema

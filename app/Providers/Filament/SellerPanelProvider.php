@@ -50,6 +50,12 @@ class SellerPanelProvider extends PanelProvider
                 'primary' => Color::hex('#F97316'),
                 'gray' => Color::Zinc,
             ])
+            ->navigationGroups([
+                'المتجر',
+                'التسويق',
+                'المالية',
+                'الإعدادات',
+            ])
             ->discoverResources(in: app_path('Filament/Seller/Resources'), for: 'App\Filament\Seller\Resources')
             ->discoverPages(in: app_path('Filament/Seller/Pages'), for: 'App\Filament\Seller\Pages')
             ->pages([

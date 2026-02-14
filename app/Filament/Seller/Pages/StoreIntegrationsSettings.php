@@ -92,7 +92,8 @@ class StoreIntegrationsSettings extends Page
                                 TextInput::make('google_sheets_webhook_url')
                                     ->label('رابط Web App (بعد النشر)')
                                     ->placeholder('https://script.google.com/macros/s/xxxxx/exec')
-                                    ->url(),
+                                    ->url()
+                                    ->live(onBlur: true),
                             ])
                             ->extraModalFooterActions([
                                 Action::make('test_google_sheets')
@@ -100,8 +101,8 @@ class StoreIntegrationsSettings extends Page
                                     ->icon('heroicon-o-signal')
                                     ->color('gray')
                                     ->action(function (): void {
-                                        $data = $this->mountedActions[array_key_last($this->mountedActions)]['data'] ?? [];
-                                        $url = trim($data['google_sheets_webhook_url'] ?? '');
+                                        $data = $this->mountedActions[0]['data'] ?? [];
+                                        $url = trim((string) ($data['google_sheets_webhook_url'] ?? ''));
                                         if (empty($url)) {
                                             Notification::make()->danger()->title('أدخل الرابط أولاً')->send();
 
@@ -129,18 +130,25 @@ class StoreIntegrationsSettings extends Page
         $escaped = htmlspecialchars($script, ENT_QUOTES, 'UTF-8');
         $escapedJson = json_encode($script);
 
-        return '<div class="space-y-4 mb-4" dir="rtl" x-data="{ copied: false }">' .
-            '<div class="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-3">' .
-            '<div class="flex items-center justify-between mb-2">' .
-            '<span class="text-sm font-medium text-gray-700 dark:text-gray-300">كود App Script</span>' .
+        return '<div class="space-y-5 mb-4" dir="rtl" x-data="{ copied: false }">' .
+            '<div class="rounded-xl border-2 border-primary-200 dark:border-primary-900 bg-gradient-to-br from-gray-50 to-primary-50/30 dark:from-gray-900 dark:to-primary-950/20 p-4 shadow-sm">' .
+            '<div class="flex items-center justify-between mb-3 gap-3">' .
+            '<span class="text-base font-semibold text-gray-800 dark:text-gray-200">كود App Script</span>' .
             '<button type="button" @click="navigator.clipboard.writeText(' . $escapedJson . ').then(() => { copied = true; setTimeout(() => copied = false, 2000); new FilamentNotification().success().title(\'تم النسخ\').send(); })" ' .
-            'class="fi-btn relative grid-flow-col items-center justify-center font-semibold outline-none transition duration-75 focus-visible:ring-2 rounded-lg fi-btn-color-gray fi-btn-size-sm gap-1.5 px-3 py-2 text-sm inline-grid shadow-sm bg-transparent border border-gray-200 dark:border-white/10 text-gray-950 dark:text-white hover:bg-gray-50 dark:hover:bg-white/5">' .
-            '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>' .
-            '<span x-text="copied ? \'تم النسخ!\' : \'نسخ\'">نسخ</span>' .
+            'class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition shadow-sm">' .
+            '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>' .
+            '<span x-text="copied ? \'تم النسخ!\' : \'نسخ الكود\'">نسخ الكود</span>' .
             '</button></div>' .
-            '<pre class="p-3 bg-gray-900 dark:bg-gray-950 text-gray-100 text-xs rounded overflow-x-auto max-h-48 overflow-y-auto" dir="ltr"><code>' . $escaped . '</code></pre>' .
+            '<pre class="p-4 bg-gray-900 dark:bg-gray-950 text-green-400 text-sm rounded-lg overflow-x-auto max-h-64 overflow-y-auto font-mono leading-relaxed" dir="ltr"><code>' . $escaped . '</code></pre>' .
             '</div>' .
-            '<p class="text-sm text-gray-600 dark:text-gray-400">١. انسخ الكود والصقه في ملف Code.gs في Google Apps Script<br>٢. احفظ ثم: نشر ← نشر كتطبيق ويب ← اختر "وصول: أي شخص"<br>٣. انسخ رابط النشر والصقه أدناه</p>' .
+            '<div class="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-4">' .
+            '<p class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">خطوات الربط:</p>' .
+            '<ol class="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">' .
+            '<li>أنشئ جدول Google جديد</li>' .
+            '<li>الإضافات → محرّر السكربتات → الصق الكود أعلاه في Code.gs</li>' .
+            '<li>احفظ (Ctrl+S) ثم: نشر → نشر كتطبيق ويب → "وصول: أي شخص"</li>' .
+            '<li>انسخ رابط النشر والصقه في الحقل أدناه</li>' .
+            '</ol></div>' .
             '</div>';
     }
 

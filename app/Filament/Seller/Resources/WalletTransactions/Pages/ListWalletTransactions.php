@@ -13,4 +13,19 @@ class ListWalletTransactions extends ListRecords
     {
         return [];
     }
+
+    protected function getTableEmptyStateHeading(): ?string
+    {
+        return 'قيد التطوير';
+    }
+
+    protected function getTableEmptyStateDescription(): ?string
+    {
+        return 'المحفظة المالية قيد التطوير حالياً. ستتوفر قريباً.';
+    }
+
+    protected function getTableEmptyStateIcon(): ?string
+    {
+        return 'heroicon-o-wrench-screwdriver';
+    }
 }

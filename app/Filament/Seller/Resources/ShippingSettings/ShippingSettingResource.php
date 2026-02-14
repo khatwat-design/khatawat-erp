@@ -40,6 +40,11 @@ class ShippingSettingResource extends Resource
         return 'الإعدادات';
     }
 
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ShippingSettingForm::configure($schema);
