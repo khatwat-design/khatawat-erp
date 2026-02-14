@@ -8,6 +8,8 @@ use Filament\Facades\Filament;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -268,6 +270,79 @@ class StoreSettings extends Page
                                     ])
                                     ->columns(1),
                             ]),
+                        Tab::make('إعدادات التوصيل')
+                            ->icon('heroicon-o-truck')
+                            ->schema([
+                                Section::make('تكاليف التوصيل حسب المحافظة')
+                                    ->description('حدد تكلفة التوصيل لكل محافظة.')
+                                    ->schema([
+                                        Action::make('open_shipping')
+                                            ->label('إدارة إعدادات التوصيل')
+                                            ->icon('heroicon-o-cog-6-tooth')
+                                            ->url(fn () => \App\Filament\Seller\Resources\ShippingSettings\ShippingSettingResource::getUrl('index', ['tenant' => Filament::getTenant()])),
+                                    ]),
+                            ]),
+                        Tab::make('الاشتراك والفواتير')
+                            ->icon('heroicon-o-credit-card')
+                            ->schema([
+                                Section::make('باقتك الحالية')
+                                    ->schema([
+                                        Placeholder::make('billing_plan')
+                                            ->label('الخطة')
+                                            ->content(fn () => Filament::getTenant()?->subscriptionPlan?->name ?? 'غير محدد'),
+                                        Placeholder::make('billing_expires')
+                                            ->label('تاريخ الانتهاء')
+                                            ->content(fn () => Filament::getTenant()?->subscription_expires_at?->format('Y-m-d') ?? '—'),
+                                    ])
+                                    ->columns(2)
+                                    ->headerActions([
+                                        Action::make('renew_subscription')
+                                            ->label('تجديد الاشتراك')
+                                            ->icon('heroicon-o-arrow-path')
+                                            ->form([
+                                                Select::make('plan_id')
+                                                    ->label('الباقة')
+                                                    ->options(\App\Models\SubscriptionPlan::query()->where('is_active', true)->pluck('name', 'id'))
+                                                    ->required(),
+                                                FileUpload::make('proof_url')
+                                                    ->label('إيصال الدفع')
+                                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
+                                                    ->maxSize(10240)
+                                                    ->disk('public')
+                                                    ->directory('payments'),
+                                                Textarea::make('notes')->label('ملاحظات')->rows(2),
+                                            ])
+                                            ->action(function (array $data): void {
+                                                $store = Filament::getTenant();
+                                                if (! $store) {
+                                                    return;
+                                                }
+                                                $plan = \App\Models\SubscriptionPlan::find($data['plan_id']);
+                                                \App\Models\StorePayment::create([
+                                                    'store_id' => $store->id,
+                                                    'subscription_plan_id' => $data['plan_id'],
+                                                    'amount' => $plan?->price ?? 0,
+                                                    'method' => 'manual',
+                                                    'proof_url' => is_array($data['proof_url'] ?? null) ? ($data['proof_url'][0] ?? null) : ($data['proof_url'] ?? null),
+                                                    'status' => 'pending',
+                                                    'notes' => $data['notes'] ?? null,
+                                                ]);
+                                                Notification::make()->success()->title('تم إرسال طلب التجديد')->body('سيتم مراجعة طلبك قريباً')->send();
+                                            }),
+                                    ]),
+                            ]),
+                        Tab::make('الدعم الفني')
+                            ->icon('heroicon-o-lifebuoy')
+                            ->schema([
+                                Section::make('التذاكر والاستفسارات')
+                                    ->description('افتح تذكرة دعم أو تابع التذاكر الحالية.')
+                                    ->schema([
+                                        Action::make('open_support')
+                                            ->label('فتح الدعم الفني')
+                                            ->icon('heroicon-o-chat-bubble-left-right')
+                                            ->url(fn () => \App\Filament\Seller\Resources\SupportTickets\SupportTicketResource::getUrl('index')),
+                                    ]),
+                            ]),
                         Tab::make('التسويق والتتبع')
                             ->icon('heroicon-o-chart-bar')
                             ->schema([
@@ -347,24 +422,17 @@ class StoreSettings extends Page
     {
         $script = $this->getGoogleSheetsAppScriptCode();
         $escaped = htmlspecialchars($script, ENT_QUOTES, 'UTF-8');
-        $escapedJson = json_encode($script);
 
-        return '<div class="space-y-5 mb-4" dir="rtl" x-data="{ copied: false }">' .
-            '<div class="rounded-xl border-2 border-primary-200 dark:border-primary-900 bg-gradient-to-br from-gray-50 to-primary-50/30 dark:from-gray-900 dark:to-primary-950/20 p-4 shadow-sm">' .
-            '<div class="flex items-center justify-between mb-3 gap-3">' .
-            '<span class="text-base font-semibold text-gray-800 dark:text-gray-200">كود App Script</span>' .
-            '<button type="button" @click="navigator.clipboard.writeText(' . $escapedJson . ').then(() => { copied = true; setTimeout(() => copied = false, 2000); new FilamentNotification().success().title(\'تم النسخ\').send(); })" ' .
-            'class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition shadow-sm">' .
-            '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>' .
-            '<span x-text="copied ? \'تم النسخ!\' : \'نسخ الكود\'">نسخ الكود</span>' .
-            '</button></div>' .
-            '<pre class="p-4 bg-gray-900 dark:bg-gray-950 text-green-400 text-sm rounded-lg overflow-x-auto max-h-64 overflow-y-auto font-mono leading-relaxed" dir="ltr"><code>' . $escaped . '</code></pre>' .
+        return '<div class="space-y-5 mb-4" dir="rtl">' .
+            '<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-900 dark:bg-gray-950 p-5 shadow-inner">' .
+            '<p class="text-sm font-medium text-gray-400 dark:text-gray-500 mb-3">كود App Script</p>' .
+            '<pre class="p-4 bg-gray-950 dark:bg-black text-green-400 text-sm rounded-lg overflow-x-auto max-h-80 overflow-y-auto font-mono leading-relaxed" dir="ltr"><code>' . $escaped . '</code></pre>' .
             '</div>' .
             '<div class="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-4">' .
             '<p class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">خطوات الربط:</p>' .
             '<ol class="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">' .
             '<li>أنشئ جدول Google جديد</li>' .
-            '<li>الإضافات → محرّر السكربتات → الصق الكود أعلاه في Code.gs</li>' .
+            '<li>الإضافات → محرّر السكربتات → انسخ الكود أعلاه والصقه في Code.gs</li>' .
             '<li>احفظ (Ctrl+S) ثم: نشر → نشر كتطبيق ويب → "وصول: أي شخص"</li>' .
             '<li>انسخ رابط النشر والصقه في الحقل أدناه</li>' .
             '</ol></div>' .

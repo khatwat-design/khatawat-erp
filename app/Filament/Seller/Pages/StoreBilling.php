@@ -15,6 +15,8 @@ use Filament\Schemas\Schema;
 
 class StoreBilling extends Page
 {
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-credit-card';
     protected static ?string $navigationLabel = 'الاشتراك والفواتير';
     protected static ?string $title = 'باقتك والاشتراك';

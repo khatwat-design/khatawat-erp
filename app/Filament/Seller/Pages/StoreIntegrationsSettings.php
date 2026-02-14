@@ -128,24 +128,17 @@ class StoreIntegrationsSettings extends Page
     {
         $script = $this->getGoogleSheetsAppScriptCode();
         $escaped = htmlspecialchars($script, ENT_QUOTES, 'UTF-8');
-        $escapedJson = json_encode($script);
 
-        return '<div class="space-y-5 mb-4" dir="rtl" x-data="{ copied: false }">' .
-            '<div class="rounded-xl border-2 border-primary-200 dark:border-primary-900 bg-gradient-to-br from-gray-50 to-primary-50/30 dark:from-gray-900 dark:to-primary-950/20 p-4 shadow-sm">' .
-            '<div class="flex items-center justify-between mb-3 gap-3">' .
-            '<span class="text-base font-semibold text-gray-800 dark:text-gray-200">كود App Script</span>' .
-            '<button type="button" @click="navigator.clipboard.writeText(' . $escapedJson . ').then(() => { copied = true; setTimeout(() => copied = false, 2000); new FilamentNotification().success().title(\'تم النسخ\').send(); })" ' .
-            'class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium transition shadow-sm">' .
-            '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>' .
-            '<span x-text="copied ? \'تم النسخ!\' : \'نسخ الكود\'">نسخ الكود</span>' .
-            '</button></div>' .
-            '<pre class="p-4 bg-gray-900 dark:bg-gray-950 text-green-400 text-sm rounded-lg overflow-x-auto max-h-64 overflow-y-auto font-mono leading-relaxed" dir="ltr"><code>' . $escaped . '</code></pre>' .
+        return '<div class="space-y-5 mb-4" dir="rtl">' .
+            '<div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-900 dark:bg-gray-950 p-5 shadow-inner">' .
+            '<p class="text-sm font-medium text-gray-400 dark:text-gray-500 mb-3">كود App Script</p>' .
+            '<pre class="p-4 bg-gray-950 dark:bg-black text-green-400 text-sm rounded-lg overflow-x-auto max-h-80 overflow-y-auto font-mono leading-relaxed" dir="ltr"><code>' . $escaped . '</code></pre>' .
             '</div>' .
             '<div class="rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 p-4">' .
             '<p class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">خطوات الربط:</p>' .
             '<ol class="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">' .
             '<li>أنشئ جدول Google جديد</li>' .
-            '<li>الإضافات → محرّر السكربتات → الصق الكود أعلاه في Code.gs</li>' .
+            '<li>الإضافات → محرّر السكربتات → انسخ الكود أعلاه والصقه في Code.gs</li>' .
             '<li>احفظ (Ctrl+S) ثم: نشر → نشر كتطبيق ويب → "وصول: أي شخص"</li>' .
             '<li>انسخ رابط النشر والصقه في الحقل أدناه</li>' .
             '</ol></div>' .

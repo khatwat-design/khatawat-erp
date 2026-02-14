@@ -18,6 +18,8 @@ class SupportTicketResource extends Resource
 {
     protected static ?string $model = SupportTicket::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedLifebuoy;
     protected static ?string $navigationLabel = 'الدعم الفني';
 

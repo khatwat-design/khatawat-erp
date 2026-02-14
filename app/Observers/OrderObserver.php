@@ -11,10 +11,14 @@ use Illuminate\Support\Facades\Log;
 
 class OrderObserver
 {
-    public function created(Order $order): void
+    public function updated(Order $order): void
     {
-        $this->notifyTelegram($order);
-        $this->pushToGoogleSheets($order);
+        $wasZero = (float) ($order->getOriginal('total_amount') ?? 0) <= 0;
+        $nowHasAmount = (float) ($order->total_amount ?? 0) > 0;
+        if ($wasZero && $nowHasAmount) {
+            $this->notifyTelegram($order);
+            $this->pushToGoogleSheets($order);
+        }
     }
 
     private function notifyTelegram(Order $order): void
