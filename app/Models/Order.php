@@ -22,6 +22,11 @@ class Order extends Model
         'customer_name',
         'customer_phone',
         'address',
+        'subtotal',
+        'discount_amount',
+        'coupon_code',
+        'coupon_details',
+        'shipping_cost',
         'total_amount',
         'order_details',
         'status',
@@ -32,6 +37,7 @@ class Order extends Model
 
     protected $casts = [
         'order_details' => 'array',
+        'coupon_details' => 'array',
         'status' => OrderStatus::class,
     ];
 

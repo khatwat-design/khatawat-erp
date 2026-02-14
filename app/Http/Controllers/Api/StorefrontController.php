@@ -39,6 +39,10 @@ class StorefrontController extends Controller
             'logo_url' => $logoUrl,
             'currency' => $branding['currency'] ?? 'IQD',
             'shipping_cost' => $store->settings['shipping_cost'] ?? null,
+            'meta_pixel_id' => $store->facebook_pixel_id,
+            'facebook_pixel_id' => $store->facebook_pixel_id,
+            'tiktok_pixel_id' => $store->tiktok_pixel_id,
+            'google_analytics_id' => $store->google_analytics_id,
         ])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');
@@ -152,6 +156,7 @@ class StorefrontController extends Controller
                 'items' => ['required', 'array', 'min:1'],
                 'items.*.product_id' => ['required', 'exists:products,id'],
                 'items.*.quantity' => ['required', 'integer', 'min:1'],
+                'coupon_code' => ['nullable', 'string', 'max:50'],
             ]);
         } catch (ValidationException $e) {
             Log::error($e->getMessage());
@@ -173,6 +178,8 @@ class StorefrontController extends Controller
         DB::beginTransaction();
 
         try {
+            $shippingCost = (float) ($store->settings['shipping_cost'] ?? 0);
+
             $order = Order::create([
                 'store_id' => $store->id,
                 'customer_first_name' => $validated['customer_first_name'],
@@ -180,13 +187,18 @@ class StorefrontController extends Controller
                 'customer_name' => trim($validated['customer_first_name'] . ' ' . $validated['customer_last_name']),
                 'customer_phone' => $validated['phone'],
                 'address' => $validated['address'],
+                'subtotal' => 0,
+                'discount_amount' => 0,
+                'coupon_code' => null,
+                'coupon_details' => null,
+                'shipping_cost' => $shippingCost,
                 'total_amount' => 0,
                 'order_details' => [],
                 'status' => 'pending',
                 'payment_status' => 'pending',
             ]);
 
-            $total = 0;
+            $subtotal = 0.0;
             $itemsSnapshot = [];
 
             foreach ($validated['items'] as $itemData) {
@@ -208,7 +220,7 @@ class StorefrontController extends Controller
                 }
 
                 $lineTotal = $unitPrice * $quantity;
-                $total += $lineTotal;
+                $subtotal += $lineTotal;
 
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -231,33 +243,47 @@ class StorefrontController extends Controller
                 ];
             }
 
-            $couponDiscount = 0;
+            $discountAmount = 0.0;
+            $couponCode = null;
+            $couponDetails = null;
+
             if (! empty($validated['coupon_code'])) {
                 $coupon = Coupon::query()
                     ->where('store_id', $store->id)
                     ->where('code', $validated['coupon_code'])
                     ->lockForUpdate()
                     ->first();
+
                 if ($coupon && $coupon->isValid()) {
                     $minAmount = $coupon->min_order_amount ? (float) $coupon->min_order_amount : 0;
-                    if ($total >= $minAmount) {
-                        $couponDiscount = match ($coupon->discount_type) {
-                            'fixed' => min((float) $coupon->discount_value, $total),
-                            default => $total * ((float) $coupon->discount_value / 100),
+                    if ($subtotal >= $minAmount) {
+                        $discountAmount = match ($coupon->discount_type) {
+                            'fixed' => min((float) $coupon->discount_value, $subtotal),
+                            default => $subtotal * ((float) $coupon->discount_value / 100),
                         };
+                        $discountAmount = round($discountAmount, 2);
                         $coupon->increment('used_count');
+                        $couponCode = $coupon->code;
+                        $couponDetails = [
+                            'discount_type' => $coupon->discount_type,
+                            'discount_value' => (float) $coupon->discount_value,
+                            'min_order_amount' => $coupon->min_order_amount ? (float) $coupon->min_order_amount : null,
+                        ];
                     }
                 }
             }
 
-            $total = max(0, $total - $couponDiscount);
+            $totalAmount = max(0, $subtotal - $discountAmount + $shippingCost);
 
             $order->update([
-                'total_amount' => $total,
+                'subtotal' => round($subtotal, 2),
+                'discount_amount' => $discountAmount,
+                'coupon_code' => $couponCode,
+                'coupon_details' => $couponDetails,
+                'shipping_cost' => $shippingCost,
+                'total_amount' => round($totalAmount, 2),
                 'order_details' => [
                     'items' => $itemsSnapshot,
-                    'coupon_discount' => $couponDiscount,
-                    'coupon_code' => $validated['coupon_code'] ?? null,
                 ],
             ]);
 

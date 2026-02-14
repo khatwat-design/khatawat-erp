@@ -61,6 +61,7 @@ class StoreSettings extends Page
             // التكاملات
             'telegram_bot_token' => $store->telegram_bot_token ?? $integrationsConfig['telegram_bot_token'] ?? '',
             'telegram_channel_id' => $store->telegram_channel_id ?? $integrationsConfig['telegram_chat_id'] ?? $integrationsConfig['telegram_channel_id'] ?? '',
+            'google_sheets_webhook_url' => $store->google_sheets_webhook_url ?? '',
             // Pixels
             'facebook_pixel_id' => $store->facebook_pixel_id ?? '',
             'tiktok_pixel_id' => $store->tiktok_pixel_id ?? '',
@@ -101,14 +102,26 @@ class StoreSettings extends Page
                                         FileUpload::make('store_logo')
                                             ->label('شعار المتجر')
                                             ->image()
+                                            ->imageEditor()
+                                            ->circleCropper()
+                                            ->maxSize(10240)
                                             ->disk('public')
-                                            ->directory('stores/theme')
+                                            ->directory(fn () => 'store-' . (Filament::getTenant()?->id ?? 'shared') . '/theme')
+                                            ->imageResizeMode('contain')
+                                            ->imageResizeTargetWidth(512)
+                                            ->imageResizeTargetHeight(512)
                                             ->imagePreviewHeight(120),
                                         FileUpload::make('hero_banner')
                                             ->label('صورة الواجهة الرئيسية')
                                             ->image()
+                                            ->imageEditor()
+                                            ->imageEditorAspectRatios([null, '16:9', '4:3', '21:9'])
+                                            ->maxSize(10240)
                                             ->disk('public')
-                                            ->directory('stores/theme')
+                                            ->directory(fn () => 'store-' . (Filament::getTenant()?->id ?? 'shared') . '/theme')
+                                            ->imageResizeMode('contain')
+                                            ->imageResizeTargetWidth(1920)
+                                            ->imageResizeTargetHeight(1080)
                                             ->imagePreviewHeight(200),
                                     ])
                                     ->columns(2),
@@ -191,6 +204,16 @@ class StoreSettings extends Page
                                             ->helperText('معرف القناة أو المجموعة (يبدأ بـ - للقنات/المجموعات)'),
                                     ])
                                     ->columns(1),
+                                Section::make('Google Sheets')
+                                    ->description('إرسال الطلبات تلقائياً إلى جدول Google.')
+                                    ->schema([
+                                        TextInput::make('google_sheets_webhook_url')
+                                            ->label('رابط Web App (App Script)')
+                                            ->placeholder('https://script.google.com/macros/s/xxxxx/exec')
+                                            ->url()
+                                            ->helperText('الصق رابط Web App بعد نشر السكربت في Google Apps Script. للتعليمات، زر إعدادات التكاملات.'),
+                                    ])
+                                    ->columns(1),
                             ]),
                         Tab::make('التسويق والتتبع')
                             ->icon('heroicon-o-chart-bar')
@@ -239,6 +262,7 @@ class StoreSettings extends Page
         // التكاملات
         $telegramToken = trim($data['telegram_bot_token'] ?? '') ?: null;
         $telegramChannel = trim($data['telegram_channel_id'] ?? '') ?: null;
+        $googleSheetsWebhook = trim($data['google_sheets_webhook_url'] ?? '') ?: null;
 
         // Pixels
         $fbPixel = trim($data['facebook_pixel_id'] ?? '') ?: null;
@@ -251,6 +275,7 @@ class StoreSettings extends Page
             'custom_domain' => $domain,
             'telegram_bot_token' => $telegramToken,
             'telegram_channel_id' => $telegramChannel,
+            'google_sheets_webhook_url' => $googleSheetsWebhook,
             'facebook_pixel_id' => $fbPixel,
             'tiktok_pixel_id' => $tiktokPixel,
             'google_analytics_id' => $gaId,

@@ -44,15 +44,27 @@ class ProductsRelationManager extends RelationManager
                         FileUpload::make('image_url')
                             ->label('الصورة الرئيسية')
                             ->image()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([null, '1:1', '4:3', '16:9'])
+                            ->maxSize(10240)
                             ->disk('public')
-                            ->directory('products')
+                            ->directory('store-' . $this->ownerRecord->id . '/products')
+                            ->imageResizeMode('contain')
+                            ->imageResizeTargetWidth(1920)
+                            ->imageResizeTargetHeight(1920)
                             ->dehydrated(fn ($state) => filled($state)),
                         FileUpload::make('gallery')
                             ->label('معرض الصور')
                             ->multiple()
                             ->reorderable()
+                            ->image()
+                            ->imageEditor()
+                            ->maxSize(10240)
                             ->disk('public')
-                            ->directory('products/gallery'),
+                            ->directory('store-' . $this->ownerRecord->id . '/products/gallery')
+                            ->imageResizeMode('contain')
+                            ->imageResizeTargetWidth(1920)
+                            ->imageResizeTargetHeight(1920),
                     ])
                     ->columns(2),
             ]);

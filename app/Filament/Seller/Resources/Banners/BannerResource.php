@@ -44,8 +44,14 @@ class BannerResource extends Resource
                         FileUpload::make('image_url')
                             ->label('الصورة')
                             ->image()
+                            ->imageEditor()
+                            ->imageEditorAspectRatios([null, '16:9', '4:3', '1:1'])
+                            ->maxSize(10240)
                             ->disk('public')
-                            ->directory('banners')
+                            ->directory(fn () => 'store-' . (\Filament\Facades\Filament::getTenant()?->id ?? 'shared') . '/banners')
+                            ->imageResizeMode('contain')
+                            ->imageResizeTargetWidth(1920)
+                            ->imageResizeTargetHeight(1920)
                             ->required()
                             ->imagePreviewHeight(150),
                         TextInput::make('link')->label('الرابط (اختياري)')->url(),

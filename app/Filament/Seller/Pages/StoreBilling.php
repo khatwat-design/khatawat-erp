@@ -52,9 +52,11 @@ class StoreBilling extends Page
                                     ->required(),
                                 FileUpload::make('proof_url')
                                     ->label('إيصال الدفع')
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
+                                    ->maxSize(10240)
                                     ->disk('public')
                                     ->directory('payments')
-                                    ->helperText('ارفع صورة إيصال الدفع'),
+                                    ->helperText('ارفع صورة إيصال الدفع (حد أقصى 10MB)'),
                                 Textarea::make('notes')->label('ملاحظات')->rows(2),
                             ])
                             ->action(function (array $data): void {

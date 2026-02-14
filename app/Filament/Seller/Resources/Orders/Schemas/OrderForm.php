@@ -52,12 +52,32 @@ class OrderForm
                             ->rows(2)
                             ->placeholder('ملاحظات داخلية')
                             ->columnSpanFull(),
-                        TextInput::make('total_amount')
-                            ->label('الإجمالي')
-                            ->disabled()
-                            ->formatStateUsing(fn ($state) => $state === null ? null : number_format((float) $state) . ' د.ع'),
                     ])
                     ->columns(2),
+                Section::make('الملخص المالي')
+                    ->description('المجموع الفرعي - الخصم + الشحن = الإجمالي')
+                    ->schema([
+                        TextInput::make('subtotal')
+                            ->label('المجموع الفرعي')
+                            ->disabled()
+                            ->formatStateUsing(fn ($state) => $state !== null ? number_format((float) $state, 2) . ' د.ع' : '—'),
+                        TextInput::make('discount_amount')
+                            ->label('الخصم')
+                            ->disabled()
+                            ->formatStateUsing(fn ($state, $record) => ($state ?? $record?->discount_amount ?? 0) > 0
+                                ? '-' . number_format((float) ($state ?? $record->discount_amount), 2) . ' د.ع' . ($record?->coupon_code ? " ({$record->coupon_code})" : '')
+                                : '—'),
+                        TextInput::make('shipping_cost')
+                            ->label('الشحن')
+                            ->disabled()
+                            ->formatStateUsing(fn ($state) => $state !== null ? number_format((float) $state, 2) . ' د.ع' : '—'),
+                        TextInput::make('total_amount')
+                            ->label('الإجمالي النهائي')
+                            ->disabled()
+                            ->formatStateUsing(fn ($state) => $state !== null ? number_format((float) $state, 2) . ' د.ع' : '—'),
+                    ])
+                    ->columns(2)
+                    ->collapsible(),
             ]);
     }
 }

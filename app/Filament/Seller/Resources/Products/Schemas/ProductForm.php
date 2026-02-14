@@ -2,6 +2,7 @@
 
 namespace App\Filament\Seller\Resources\Products\Schemas;
 
+use Filament\Facades\Filament;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
@@ -42,8 +43,14 @@ class ProductForm
                             ->label('معرض الصور')
                             ->multiple()
                             ->reorderable()
+                            ->image()
+                            ->imageEditor()
+                            ->maxSize(10240)
                             ->disk('public')
-                            ->directory('products/gallery'),
+                            ->directory(fn () => 'store-' . (Filament::getTenant()?->id ?? 'shared') . '/products/gallery')
+                            ->imageResizeMode('contain')
+                            ->imageResizeTargetWidth(1920)
+                            ->imageResizeTargetHeight(1920),
                     ])
                     ->columns(2),
             ]);

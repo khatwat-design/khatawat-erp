@@ -54,6 +54,8 @@ class StorePaymentResource extends Resource
                             ->required(),
                         FileUpload::make('proof_url')
                             ->label('إيصال الدفع')
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'application/pdf'])
+                            ->maxSize(10240)
                             ->disk('public')
                             ->directory('payments'),
                         Select::make('status')

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Observers;
 
+use App\Jobs\PushOrderToGoogleSheetsJob;
 use App\Models\Order;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -13,6 +14,7 @@ class OrderObserver
     public function created(Order $order): void
     {
         $this->notifyTelegram($order);
+        $this->pushToGoogleSheets($order);
     }
 
     private function notifyTelegram(Order $order): void
@@ -39,6 +41,17 @@ class OrderObserver
         $text .= "الهاتف: {$order->customer_phone}\n";
         $text .= "الإجمالي: {$total} د.ع\n";
 
+        $items = $order->order_details['items'] ?? [];
+        if (! empty($items)) {
+            $text .= "\n*المنتجات:*\n";
+            foreach ($items as $item) {
+                $name = $item['name'] ?? '—';
+                $qty = (int) ($item['quantity'] ?? 0);
+                $lineTotal = (float) ($item['line_total'] ?? 0);
+                $text .= "• {$name} × {$qty} = " . number_format($lineTotal) . " د.ع\n";
+            }
+        }
+
         try {
             Http::timeout(5)->post("https://api.telegram.org/bot{$token}/sendMessage", [
                 'chat_id' => $chatId,
@@ -48,5 +61,15 @@ class OrderObserver
         } catch (\Throwable $e) {
             Log::warning('Telegram order notification failed: ' . $e->getMessage());
         }
+    }
+
+    private function pushToGoogleSheets(Order $order): void
+    {
+        $store = $order->store;
+        if (! $store || ! $store->google_sheets_webhook_url) {
+            return;
+        }
+
+        PushOrderToGoogleSheetsJob::dispatch($order);
     }
 }

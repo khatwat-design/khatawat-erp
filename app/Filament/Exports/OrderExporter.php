@@ -26,8 +26,19 @@ class OrderExporter extends Exporter
                 ->label('الهاتف'),
             ExportColumn::make('address')
                 ->label('العنوان'),
+            ExportColumn::make('subtotal')
+                ->label('المجموع الفرعي')
+                ->formatStateUsing(fn ($state, Order $record) => $state !== null ? number_format((float) $state, 2) : ($record->subtotal !== null ? number_format((float) $record->subtotal, 2) : '')),
+            ExportColumn::make('discount_amount')
+                ->label('الخصم')
+                ->formatStateUsing(fn ($state) => $state !== null && (float) $state > 0 ? number_format((float) $state, 2) : ''),
+            ExportColumn::make('coupon_code')
+                ->label('كود الخصم'),
+            ExportColumn::make('shipping_cost')
+                ->label('الشحن')
+                ->formatStateUsing(fn ($state) => $state !== null ? number_format((float) $state, 2) : ''),
             ExportColumn::make('total_amount')
-                ->label('الإجمالي')
+                ->label('الإجمالي النهائي')
                 ->formatStateUsing(fn ($state) => $state !== null ? number_format((float) $state, 2) : ''),
             ExportColumn::make('status')
                 ->label('الحالة')
