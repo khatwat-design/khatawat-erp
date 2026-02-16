@@ -70,4 +70,11 @@ class OrderResource extends Resource
     {
         return false;
     }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes()
+            ->orderBy('created_at', 'desc');
+    }
 }
