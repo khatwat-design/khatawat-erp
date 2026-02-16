@@ -20,6 +20,8 @@ class ShippingSettingResource extends Resource
 {
     protected static ?string $model = ShippingSetting::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
     protected static ?string $navigationLabel = 'إعدادات التوصيل';
     protected static ?string $modelLabel = 'إعداد توصيل';

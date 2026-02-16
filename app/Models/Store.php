@@ -33,6 +33,7 @@ class Store extends Model
         'telegram_bot_token',
         'telegram_channel_id',
         'google_sheets_token',
+        'google_sheets_webhook_url',
         'logo_url',
         'subscription_plan',
         'subscription_expires_at',
