@@ -33,6 +33,11 @@ class WalletTransactionResource extends Resource
         return 'المحفظة المالية';
     }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'المالية';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return WalletTransactionForm::configure($schema);

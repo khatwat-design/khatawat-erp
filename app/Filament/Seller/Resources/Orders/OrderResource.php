@@ -34,6 +34,11 @@ class OrderResource extends Resource
         return 'الطلبات';
     }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'المتجر';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return OrderForm::configure($schema);

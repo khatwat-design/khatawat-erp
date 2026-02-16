@@ -39,6 +39,17 @@ class SellerPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->navigationGroups([
+                'المتجر',
+                'التسويق',
+                'المالية',
+                'الإعدادات',
+            ])
+            ->resources([
+                \App\Filament\Seller\Resources\Banners\BannerResource::class,
+                \App\Filament\Seller\Resources\Coupons\CouponResource::class,
+                \App\Filament\Seller\Resources\SupportTickets\SupportTicketResource::class,
+            ])
             ->discoverResources(in: app_path('Filament/Seller/Resources'), for: 'App\Filament\Seller\Resources')
             ->discoverPages(in: app_path('Filament/Seller/Pages'), for: 'App\Filament\Seller\Pages')
             ->pages([

@@ -34,6 +34,11 @@ class ProductResource extends Resource
         return 'المنتجات';
     }
 
+    public static function getNavigationGroup(): ?string
+    {
+        return 'المتجر';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ProductForm::configure($schema);
