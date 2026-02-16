@@ -34,7 +34,12 @@ class StoreSettings extends Page
 
     protected static ?string $slug = 'settings';
 
-    protected static ?int $navigationSort = 100;
+    protected static ?int $navigationSort = 999;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'الإعدادات';
+    }
 
     public function mount(): void
     {
@@ -317,7 +322,17 @@ class StoreSettings extends Page
                                         Action::make('open_support')
                                             ->label('فتح الدعم الفني')
                                             ->icon('heroicon-o-chat-bubble-left-right')
-                                            ->url(fn () => \App\Filament\Seller\Resources\SupportTickets\SupportTicketResource::getUrl('index')),
+                                            ->url(function () {
+                                                if (\Illuminate\Support\Facades\Route::has('filament.seller.resources.support-tickets.index')) {
+                                                    return \App\Filament\Seller\Resources\SupportTickets\SupportTicketResource::getUrl('index');
+                                                }
+                                                return \Filament\Facades\Filament::getUrl();
+                                            })
+                                            ->visible(fn () => \Illuminate\Support\Facades\Route::has('filament.seller.resources.support-tickets.index')),
+                                        Placeholder::make('support_coming_soon')
+                                            ->label('')
+                                            ->content('الدعم الفني سيُفعّل قريباً.')
+                                            ->visible(fn () => ! \Illuminate\Support\Facades\Route::has('filament.seller.resources.support-tickets.index')),
                                     ]),
                             ]),
                     ]),
